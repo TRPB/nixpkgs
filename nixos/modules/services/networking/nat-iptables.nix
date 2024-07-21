@@ -56,6 +56,8 @@ let
         -s '${range}' ${optionalString (cfg.externalInterface != null) "-o ${cfg.externalInterface}"} ${dest}
     '') internalIPs}
 
+    ${iptables} -t nat -A nixos-nat-post -m addrtype --src-type LOCAL --dst-type UNICAST -j MASQUERADE
+
     # NAT from external ports to internal ports.
     ${concatMapStrings (fwd: ''
       ${iptables} -w -t nat -A nixos-nat-pre \
