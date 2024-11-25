@@ -38,6 +38,10 @@ let
         (lib.filterAttrs (_username: opts: opts.initialHashedPassword != null) userCfg.users))
         ++
       (lib.mapAttrsToList
+        (username: opts: "cat '${opts.initialHashedPasswordFile}' > 'passwd.hashed-password.${username}'")
+        (lib.filterAttrs (_username: opts: opts.initialHashedPasswordFile != null) userCfg.users))
+        ++
+      (lib.mapAttrsToList
         (username: opts: "echo -n '${opts.initialPassword}' > 'passwd.plaintext-password.${username}'")
         (lib.filterAttrs (_username: opts: opts.initialPassword != null) userCfg.users))
         ++

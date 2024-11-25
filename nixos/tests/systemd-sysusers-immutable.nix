@@ -1,11 +1,11 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 let
   rootPassword = "$y$j9T$p6OI0WN7.rSfZBOijjRdR.$xUOA2MTcB48ac.9Oc5fz8cxwLv1mMqabnn333iOzSA6";
   normaloPassword = "$y$j9T$3aiOV/8CADAK22OK2QT3/0$67OKd50Z4qTaZ8c/eRWHLIM.o3ujtC1.n9ysmJfv639";
   newNormaloPassword = "mellow";
+  path = (pkgs.writeText "hashed_password_file" normaloPassword).outPath;
 in
-
 {
 
   name = "activation-sysusers-immutable";
@@ -22,6 +22,11 @@ in
     users.users.normalo = {
       isNormalUser = true;
       initialHashedPassword = normaloPassword;
+    };
+
+    users.users.normalf = {
+      isNormalUser = true;
+      initialHashedPasswordFile = (pkgs.writeText "hashed_password_file" normaloPassword).outPath;
     };
 
     specialisation.new-generation.configuration = {
@@ -52,6 +57,10 @@ in
       assert machine.succeed("stat -c '%U' /home/normalo") == "normalo\n"
       assert "${normaloPassword}" in machine.succeed("getent shadow normalo"), "normalo user password is not correct"
 
+    with subtest("normalf user is created"):
+      print(machine.succeed("getent passwd normalf"))
+      assert machine.succeed("stat -c '%U' /home/normalf") == "normalf\n"
+      assert "${normaloPassword}" in machine.succeed("getent shadow normalf"), "normalf user password is not correct"
 
     machine.succeed("/run/current-system/specialisation/new-generation/bin/switch-to-configuration switch")
 
